@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pediatric Clinical EMR</title>
+    <title>Pediatric EMR Dashboard</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,13 +14,17 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
                     colors: {
                         brand: {
                             50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 300: '#5eead4',
                             400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 900: '#134e4a',
                         },
-                        pediatric: { blue: '#e0f2fe', purple: '#f3e8ff', pink: '#fce7f3' }
+                        pediatric: {
+                            blue: '#e0f2fe', purple: '#f3e8ff', pink: '#fce7f3',
+                        }
                     }
                 }
             }
@@ -34,15 +38,21 @@
                 radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, transparent 50%), 
                 radial-gradient(at 50% 0%, hsla(225,39%,30%,0) 0, transparent 50%), 
                 radial-gradient(at 100% 0%, hsla(339,49%,30%,0) 0, transparent 50%);
+            min-height: 100vh;
         }
         
         .glass-panel {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08), inset 0 2px 4px 0 rgba(255, 255, 255, 0.3);
         }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         .mood-input:checked + div {
             border-color: #14b8a6;
@@ -50,282 +60,250 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px -2px rgba(20, 184, 166, 0.15);
         }
-
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        /* Utility for hiding views */
-        .view-hidden { display: none !important; }
     </style>
 </head>
-<body class="text-slate-800 min-h-screen relative overflow-x-hidden font-sans selection:bg-brand-200 selection:text-brand-900">
+<body class="text-slate-800 relative font-sans selection:bg-brand-200 selection:text-brand-900 overflow-x-hidden">
 
+    <!-- Background Decor -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none no-print">
         <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-pediatric-purple/40 blur-3xl mix-blend-multiply"></div>
         <div class="absolute top-[20%] -right-[10%] w-[35%] h-[35%] rounded-full bg-pediatric-blue/50 blur-3xl mix-blend-multiply"></div>
         <div class="absolute -bottom-[10%] left-[20%] w-[40%] h-[40%] rounded-full bg-brand-100/40 blur-3xl mix-blend-multiply"></div>
     </div>
 
-    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 flex items-center gap-3">
-                    <span class="bg-brand-500 text-white p-2 rounded-xl shadow-lg shadow-brand-500/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                    </span>
-                    KinderCare EMR
-                </h1>
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4 bg-white/40 p-4 rounded-2xl backdrop-blur-md border border-white/50 shadow-sm">
+            <div class="flex items-center gap-4 cursor-pointer" onclick="showRosterView()">
+                <div class="bg-gradient-to-br from-brand-400 to-brand-600 text-white p-2.5 rounded-xl shadow-lg shadow-brand-500/20">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight leading-tight">KinderCare EMR</h1>
+                    <p class="text-slate-500 text-xs font-medium">Pediatric Clinical Database</p>
+                </div>
             </div>
-            
-            <div id="authStatus" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 border border-white shadow-sm text-sm font-semibold text-slate-600 backdrop-blur-sm">
-                <span class="relative flex h-3 w-3">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-slate-500"></span>
-                </span>
-                Connecting to Cloud...
+            <div id="authStatus" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-slate-100 shadow-sm text-xs font-semibold text-slate-600">
+                <span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-slate-500"></span></span>
+                Connecting...
             </div>
         </header>
 
-        <section id="view-roster" class="transition-all duration-300">
+        <div id="rosterView" class="block animate-fade-in">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-slate-800">Patient Roster</h2>
-                <button id="openAddPatientBtn" class="bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 px-5 rounded-xl shadow-lg shadow-brand-500/30 transition-all flex items-center gap-2 text-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Patient Roster</h2>
+                    <p class="text-sm text-slate-500">Select a child to view or add health records</p>
+                </div>
+                <button onclick="document.getElementById('addPatientModal').classList.remove('hidden')" class="bg-brand-500 hover:bg-brand-600 text-white font-bold py-2 px-4 rounded-xl shadow-lg shadow-brand-500/30 transition-all text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Add Patient
                 </button>
             </div>
             
-            <div id="rosterGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Patient cards will be injected here -->
+            <div id="patientsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Loading State -->
+                <div class="col-span-full py-12 text-center text-slate-400 flex flex-col items-center">
+                    <svg class="animate-spin h-8 w-8 text-brand-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p>Loading database...</p>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <section id="view-patient" class="view-hidden transition-all duration-300">
-            <button id="backToRosterBtn" class="mb-4 text-slate-500 hover:text-brand-600 font-semibold flex items-center gap-2 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        <div id="patientFileView" class="hidden animate-fade-in">
+            <button onclick="showRosterView()" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to Roster
             </button>
-            
-            <!-- Patient Header Profile -->
-            <div class="glass-panel rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center gap-6">
-                <div id="pf-avatar-container" class="w-24 h-24 rounded-2xl bg-gradient-to-br from-brand-100 to-pediatric-blue flex items-center justify-center text-3xl font-bold text-brand-700 overflow-hidden shadow-inner">
-                    <!-- Avatar injected here -->
-                </div>
-                <div class="flex-1 text-center md:text-left">
-                    <h2 id="pf-name" class="text-2xl font-bold text-slate-800">Patient Name</h2>
-                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-2 text-sm text-slate-600">
-                        <span id="pf-age" class="bg-slate-100 px-3 py-1 rounded-lg font-medium">-- yrs</span>
-                        <span id="pf-sex" class="bg-slate-100 px-3 py-1 rounded-lg font-medium">--</span>
-                        <span class="text-slate-300">|</span>
-                        <span class="font-medium text-amber-600 flex items-center gap-1">⚠️ <span id="pf-allergies">None</span></span>
+
+            <!-- Patient Header Card -->
+            <div class="glass-panel rounded-3xl p-6 mb-6 flex flex-col md:flex-row gap-6 items-start md:items-center">
+                <img id="pfImage" src="https://placehold.co/100x100/e2e8f0/64748b?text=?" class="w-20 h-20 rounded-2xl object-cover shadow-sm border-2 border-white" alt="Patient">
+                <div class="flex-1">
+                    <h2 id="pfName" class="text-2xl font-bold text-slate-800">--</h2>
+                    <div class="flex flex-wrap gap-3 mt-2 text-sm">
+                        <span class="bg-white/60 px-2.5 py-1 rounded-md border border-slate-200 text-slate-600 font-medium" id="pfAge">-- yrs</span>
+                        <span class="bg-white/60 px-2.5 py-1 rounded-md border border-slate-200 text-slate-600 font-medium" id="pfSex">--</span>
                     </div>
+                </div>
+                <div class="w-full md:w-auto bg-red-50/50 border border-red-100 p-3 rounded-xl">
+                    <p class="text-[10px] uppercase font-bold text-red-400 mb-1">Medical Alerts</p>
+                    <p id="pfAlerts" class="text-sm font-semibold text-red-700 max-w-[200px] truncate">None</p>
                 </div>
             </div>
 
-            <div class="grid lg:grid-cols-[1.5fr_2fr] gap-8 items-start">
-                <!-- Left Side: Data Entry Form for Visit -->
-                <div class="glass-panel rounded-3xl p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-bold text-slate-800">Log Clinical Visit</h3>
-                        <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-1 rounded-md border border-brand-100">Today</span>
+            <div class="grid lg:grid-cols-[1fr_2fr] gap-6 items-start">
+                
+                <section class="glass-panel rounded-3xl p-6 sticky top-4">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="text-lg font-bold text-slate-800">New Clinical Check</h3>
                     </div>
 
-                    <form id="visitForm" class="space-y-6">
+                    <form id="visitForm" class="space-y-5">
                         <!-- Vitals -->
-                        <div class="p-4 rounded-2xl bg-slate-50/50 border border-slate-100 space-y-4">
-                            <h4 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Vitals & Growth</h4>
-                            <div class="grid grid-cols-3 gap-3">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Heart Rate</label>
-                                    <input type="number" id="vHr" placeholder="BPM" class="w-full bg-white border border-slate-200 text-sm rounded-xl p-2.5">
-                                </div>
+                        <div class="p-4 rounded-2xl bg-white/50 border border-slate-100 space-y-4">
+                            <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-500 mb-1">Height (cm)</label>
-                                    <input type="number" id="vHeight" step="0.1" placeholder="0.0" class="w-full bg-white border border-slate-200 text-sm rounded-xl p-2.5">
+                                    <input type="number" id="vHeight" step="0.1" class="w-full bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-500 mb-1">Weight (kg)</label>
-                                    <input type="number" id="vWeight" step="0.1" placeholder="0.0" class="w-full bg-white border border-slate-200 text-sm rounded-xl p-2.5">
+                                    <input type="number" id="vWeight" step="0.1" class="w-full bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
                                 </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-100">
+                                <span class="text-xs font-semibold text-slate-500">BMI</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="vBmiBadge" class="hidden px-2 py-0.5 rounded text-[10px] font-bold uppercase"></span>
+                                    <span id="vBmiValue" class="text-base font-bold text-slate-800">--</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Heart Rate (BPM)</label>
+                                <input type="number" id="vHr" class="w-full bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
                             </div>
                         </div>
 
-                        <!-- Dental & Meds -->
-                        <div class="space-y-4">
+                        <!-- Teeth & Meds -->
+                        <div class="space-y-3">
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Teeth Status</label>
-                                <select id="vTeeth" class="w-full bg-white/70 border border-slate-200 text-sm rounded-xl p-3">
-                                    <option value="Healthy">😁 Healthy & Clean</option>
-                                    <option value="Erupting">🦷 New Teeth Erupting</option>
-                                    <option value="Decay/Cavities">⚠️ Visible Decay / Cavities</option>
-                                    <option value="Referral Needed">🏥 Needs Dental Referral</option>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Teeth Status</label>
+                                <select id="vTeeth" class="w-full bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer">
+                                    <option value="Healthy">Healthy & Clean</option>
+                                    <option value="Erupting">New Teeth Erupting</option>
+                                    <option value="Decay/Cavities">Decay / Cavities</option>
                                 </select>
                             </div>
-                            
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Prescriptions / Rx</label>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Administered / Active Meds</label>
                                 <div class="flex gap-2 mb-2">
-                                    <input type="text" id="vMedInput" placeholder="Add medication..." class="flex-1 bg-white/70 border border-slate-200 text-sm rounded-xl p-3" autocomplete="off">
-                                    <button type="button" id="addMedBtn" class="bg-brand-100 hover:bg-brand-200 text-brand-700 font-semibold px-4 py-2 rounded-xl text-sm">Add</button>
+                                    <input type="text" id="vMedInput" placeholder="Add medication..." class="flex-1 bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
+                                    <button type="button" id="vAddMedBtn" class="bg-brand-50 text-brand-600 px-3 py-2 rounded-xl text-sm font-bold border border-brand-200 hover:bg-brand-100">Add</button>
                                 </div>
-                                <div id="medTagsContainer" class="flex flex-wrap gap-2"></div>
+                                <div id="vMedTags" class="flex flex-wrap gap-1.5 empty:hidden"></div>
                             </div>
                         </div>
 
                         <!-- Milestones -->
-                        <div class="p-4 rounded-2xl bg-white/50 border border-slate-200 space-y-4">
-                            <h4 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Milestones</h4>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Gross Motor</label>
-                                    <select id="mGross" class="w-full bg-white border border-slate-200 text-sm rounded-xl p-2">
-                                        <option value="Meeting">✅ Meeting</option>
-                                        <option value="Monitoring">👀 Monitoring</option>
-                                        <option value="Action">⚠️ Action</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Fine Motor</label>
-                                    <select id="mFine" class="w-full bg-white border border-slate-200 text-sm rounded-xl p-2">
-                                        <option value="Meeting">✅ Meeting</option>
-                                        <option value="Monitoring">👀 Monitoring</option>
-                                        <option value="Action">⚠️ Action</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Speech</label>
-                                    <select id="mSpeech" class="w-full bg-white border border-slate-200 text-sm rounded-xl p-2">
-                                        <option value="Meeting">✅ Meeting</option>
-                                        <option value="Monitoring">👀 Monitoring</option>
-                                        <option value="Action">⚠️ Action</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Social</label>
-                                    <select id="mSocial" class="w-full bg-white border border-slate-200 text-sm rounded-xl p-2">
-                                        <option value="Meeting">✅ Meeting</option>
-                                        <option value="Monitoring">👀 Monitoring</option>
-                                        <option value="Action">⚠️ Action</option>
-                                    </select>
-                                </div>
+                        <div class="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-white/50 border border-slate-100">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Gross Motor</label>
+                                <select id="vGross" class="w-full bg-white border border-slate-200 text-xs rounded-lg px-2 py-1.5"><option>Meeting</option><option>Monitoring</option><option>Action</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Fine Motor</label>
+                                <select id="vFine" class="w-full bg-white border border-slate-200 text-xs rounded-lg px-2 py-1.5"><option>Meeting</option><option>Monitoring</option><option>Action</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Speech</label>
+                                <select id="vSpeech" class="w-full bg-white border border-slate-200 text-xs rounded-lg px-2 py-1.5"><option>Meeting</option><option>Monitoring</option><option>Action</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Social</label>
+                                <select id="vSocial" class="w-full bg-white border border-slate-200 text-xs rounded-lg px-2 py-1.5"><option>Meeting</option><option>Monitoring</option><option>Action</option></select>
                             </div>
                         </div>
 
                         <!-- Mood -->
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">Mood & Observation <span class="text-red-400">*</span></label>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Mood</label>
                             <div class="grid grid-cols-4 gap-2">
-                                <label class="cursor-pointer relative group">
-                                    <input type="radio" name="vMood" value="Happy" class="mood-input sr-only" required>
-                                    <div class="flex flex-col items-center justify-center p-2 rounded-xl border-2 border-transparent bg-white/60 h-12 text-xl">😄</div>
-                                </label>
-                                <label class="cursor-pointer relative group">
-                                    <input type="radio" name="vMood" value="Calm" class="mood-input sr-only">
-                                    <div class="flex flex-col items-center justify-center p-2 rounded-xl border-2 border-transparent bg-white/60 h-12 text-xl">😌</div>
-                                </label>
-                                <label class="cursor-pointer relative group">
-                                    <input type="radio" name="vMood" value="Fussy" class="mood-input sr-only">
-                                    <div class="flex flex-col items-center justify-center p-2 rounded-xl border-2 border-transparent bg-white/60 h-12 text-xl">😫</div>
-                                </label>
-                                <label class="cursor-pointer relative group">
-                                    <input type="radio" name="vMood" value="Sick" class="mood-input sr-only">
-                                    <div class="flex flex-col items-center justify-center p-2 rounded-xl border-2 border-transparent bg-white/60 h-12 text-xl">🤒</div>
-                                </label>
+                                <label class="cursor-pointer"><input type="radio" name="vMood" value="Happy" class="mood-input sr-only" required><div class="flex items-center justify-center py-2 rounded-xl border border-slate-200 bg-white text-xl">😄</div></label>
+                                <label class="cursor-pointer"><input type="radio" name="vMood" value="Calm" class="mood-input sr-only"><div class="flex items-center justify-center py-2 rounded-xl border border-slate-200 bg-white text-xl">😌</div></label>
+                                <label class="cursor-pointer"><input type="radio" name="vMood" value="Fussy" class="mood-input sr-only"><div class="flex items-center justify-center py-2 rounded-xl border border-slate-200 bg-white text-xl">😫</div></label>
+                                <label class="cursor-pointer"><input type="radio" name="vMood" value="Sick" class="mood-input sr-only"><div class="flex items-center justify-center py-2 rounded-xl border border-slate-200 bg-white text-xl">🤒</div></label>
                             </div>
                         </div>
 
-                        <button type="submit" id="submitVisitBtn" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-brand-500/30 flex justify-center items-center gap-2">
-                            Save Visit Record
-                        </button>
+                        <button type="submit" id="vSubmitBtn" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-xl shadow-md transition-all text-sm">Save Check-in</button>
                     </form>
-                </div>
+                </section>
 
-                <!-- Right Side: Visit History Table -->
-                <div class="glass-panel rounded-3xl p-6 h-full flex flex-col min-h-[500px]">
+                <section class="glass-panel rounded-3xl p-6">
                     <h3 class="text-lg font-bold text-slate-800 mb-4">Visit History</h3>
-                    <div class="overflow-x-auto rounded-xl border border-slate-100 bg-white/50 flex-1">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-600 border-b border-slate-200">
-                                    <th class="p-3 font-semibold">Date</th>
-                                    <th class="p-3 font-semibold">Vitals</th>
-                                    <th class="p-3 font-semibold">Notes & Meds</th>
+                    <div class="overflow-x-auto rounded-2xl border border-slate-100 bg-white/50">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-slate-50/80 text-slate-500">
+                                <tr>
+                                    <th class="p-4 font-semibold w-1/4">Date</th>
+                                    <th class="p-4 font-semibold w-1/4">Vitals</th>
+                                    <th class="p-4 font-semibold w-1/3">Notes / Meds</th>
+                                    <th class="p-4 font-semibold text-center w-1/12">Mood</th>
                                 </tr>
                             </thead>
-                            <tbody id="visitHistoryBody" class="divide-y divide-slate-100/80">
-                                <!-- Visits injected here -->
+                            <tbody id="visitsTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="4" class="p-8 text-center text-slate-400">Loading records...</td></tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </section>
             </div>
-        </section>
+        </div>
     </main>
 
-    <div id="addPatientModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm view-hidden p-4">
-        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative overflow-y-auto max-h-[90vh]">
-            <button id="closeModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <div id="addPatientModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="document.getElementById('addPatientModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-full p-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             
             <h3 class="text-xl font-bold text-slate-800 mb-6">Register New Patient</h3>
             
-            <form id="addPatientForm" class="space-y-4">
-                <!-- Profile Picture Upload -->
-                <div class="flex flex-col items-center justify-center mb-4">
-                    <label for="pPhoto" class="cursor-pointer group flex flex-col items-center">
-                        <div id="photoPreview" class="w-20 h-20 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden group-hover:border-brand-400 transition-colors">
-                            <svg class="w-8 h-8 text-slate-400 group-hover:text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        </div>
-                        <span class="text-xs font-semibold text-brand-600 mt-2">Upload Photo</span>
-                    </label>
-                    <input type="file" id="pPhoto" accept="image/*" class="hidden">
+            <form id="newPatientForm" class="space-y-4">
+                <!-- Free Storage Image Compressor Implementation -->
+                <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="w-16 h-16 rounded-xl bg-slate-200 border border-slate-300 overflow-hidden flex items-center justify-center shrink-0">
+                        <img id="newPPreview" src="https://placehold.co/100x100/e2e8f0/64748b?text=+" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Profile Picture (Compressed locally)</label>
+                        <input type="file" id="newPImage" accept="image/*" class="text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer w-full">
+                        <input type="hidden" id="newPBase64">
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Full Name *</label>
-                    <input type="text" id="nName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Full Name *</label>
+                    <input type="text" id="newPName" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Age (Yrs) *</label>
-                        <input type="number" id="nAge" step="0.1" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Date of Birth *</label>
+                        <input type="date" id="newPDob" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Sex</label>
-                        <select id="nSex" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Biological Sex</label>
+                        <select id="newPSex" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                            <option>Male</option><option>Female</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Known Allergies</label>
-                    <input type="text" id="nAllergies" placeholder="e.g. Peanuts, Penicillin..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Known Allergies</label>
+                    <input type="text" id="newPAllergies" placeholder="e.g., Peanuts, Penicillin..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
                 </div>
-                
-                <button type="submit" id="savePatientBtn" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg mt-4 flex items-center justify-center gap-2">
-                    Create Patient Record
-                </button>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Chronic Conditions</label>
+                    <input type="text" id="newPConditions" placeholder="e.g., Asthma..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                </div>
+
+                <button type="submit" id="newPSubmit" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-xl mt-4 transition-colors">Register Patient</button>
             </form>
         </div>
     </div>
 
-    <!-- Toast Notifications -->
-    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 no-print"></div>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // Required Literal Firebase Configuration
         const firebaseConfig = {
@@ -338,316 +316,371 @@
             measurementId: "G-9LD3NPR9ZJ"
         };
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'k-emr-app';
-
-        let app, db, auth, storage, currentUserId;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kindercare-emr';
+        
+        let app, db, auth, currentUserId;
         let patients = [];
-        let currentPatientId = null;
-        let visitsUnsubscribe = null;
-        let currentMeds = [];
-        let selectedPhotoFile = null;
+        let currentActivePatientId = null;
+        let unsubscribeVisits = null;
+        let currentVisitMeds = [];
 
+        // DOM elements
+        const authStatus = document.getElementById('authStatus');
+        const rosterView = document.getElementById('rosterView');
+        const patientFileView = document.getElementById('patientFileView');
+        const patientsGrid = document.getElementById('patientsGrid');
+        
+        // Form & Toast
+        const toastContainer = document.getElementById('toastContainer');
+        
         // Init Firebase
         try {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
-            storage = getStorage(app);
 
-            signInAnonymously(auth);
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                signInWithCustomToken(auth, __initial_auth_token).catch(() => signInAnonymously(auth));
+            } else {
+                signInAnonymously(auth);
+            }
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     currentUserId = user.uid;
-                    document.getElementById('authStatus').innerHTML = `<span class="relative flex h-3 w-3"><span class="absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-brand-500"></span></span> Connected`;
+                    authStatus.innerHTML = `<span class="flex h-2 w-2 relative"><span class="absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span></span> Cloud Secured`;
                     loadPatients();
                 } else {
                     currentUserId = null;
+                    authStatus.innerHTML = `<span class="h-2 w-2 rounded-full bg-red-500"></span> Offline`;
                 }
             });
         } catch (error) {
             console.error("Firebase init failed:", error);
-            showToast("Database init failed.", "error");
+            showToast("Database connection error.", "error");
         }
 
-        // --- Core Functions ---
-        function getPatientsRef() {
-            return collection(db, 'artifacts', appId, 'users', currentUserId, 'patients');
-        }
-
-        function getVisitsRef(pId) {
-            return collection(db, 'artifacts', appId, 'users', currentUserId, 'patients', pId, 'visits');
-        }
-
-        function loadPatients() {
-            onSnapshot(getPatientsRef(), (snapshot) => {
-                patients = [];
-                snapshot.forEach(doc => patients.push({ id: doc.id, ...doc.data() }));
-                renderRoster();
-            });
-        }
-
-        // --- Avatar Helper ---
-        function getAvatarHtml(patient, sizeClass = "w-12 h-12 text-lg") {
-            if (patient.photoUrl) {
-                return `<img src="${patient.photoUrl}" alt="${patient.name}" class="w-full h-full object-cover">`;
-            } else {
-                return `<span class="uppercase">${patient.name.charAt(0)}</span>`;
-            }
-        }
-
-        // --- UI Rendering ---
-        function renderRoster() {
-            const grid = document.getElementById('rosterGrid');
-            grid.innerHTML = '';
-            
-            if(patients.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center p-8 text-slate-500 glass-panel rounded-2xl">No patients registered yet. Click 'Add Patient' to start.</div>`;
-                return;
-            }
-
-            patients.forEach(p => {
-                const card = document.createElement('div');
-                card.className = "glass-panel rounded-2xl p-5 cursor-pointer hover:shadow-lg transition-all group flex items-center gap-4";
-                card.onclick = () => openPatientFile(p.id);
-                
-                card.innerHTML = `
-                    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-brand-100 to-pediatric-blue flex items-center justify-center font-bold text-brand-700 overflow-hidden shadow-inner flex-shrink-0">
-                        ${getAvatarHtml(p, 'w-14 h-14 text-xl')}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h3 class="font-bold text-slate-800 text-lg truncate group-hover:text-brand-600 transition-colors">${p.name}</h3>
-                        <p class="text-sm text-slate-500">${p.age} yrs • ${p.sex}</p>
-                    </div>
-                    <div class="text-slate-300 group-hover:text-brand-400 group-hover:translate-x-1 transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function openPatientFile(id) {
-            currentPatientId = id;
-            const patient = patients.find(p => p.id === id);
-            if (!patient) return;
-
-            // Update Header
-            document.getElementById('pf-avatar-container').innerHTML = getAvatarHtml(patient);
-            document.getElementById('pf-name').textContent = patient.name;
-            document.getElementById('pf-age').textContent = `${patient.age} yrs`;
-            document.getElementById('pf-sex').textContent = patient.sex;
-            document.getElementById('pf-allergies').textContent = patient.allergies || 'No Known Allergies';
-
-            // Switch Views
-            document.getElementById('view-roster').classList.add('view-hidden');
-            document.getElementById('view-patient').classList.remove('view-hidden');
-            
-            // Clear form
-            document.getElementById('visitForm').reset();
-            currentMeds = [];
-            renderMedTags();
-
-            // Load Visits
-            if (visitsUnsubscribe) visitsUnsubscribe();
-            visitsUnsubscribe = onSnapshot(getVisitsRef(id), (snapshot) => {
-                const visits = [];
-                snapshot.forEach(d => visits.push({ id: d.id, ...d.data() }));
-                renderVisitHistory(visits);
-            });
-        }
-
-        document.getElementById('backToRosterBtn').onclick = () => {
-            document.getElementById('view-patient').classList.add('view-hidden');
-            document.getElementById('view-roster').classList.remove('view-hidden');
-            currentPatientId = null;
-        };
-
-        function renderVisitHistory(visits) {
-            const tbody = document.getElementById('visitHistoryBody');
-            tbody.innerHTML = '';
-            
-            if(visits.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-400">No visits recorded yet.</td></tr>`;
-                return;
-            }
-
-            const sorted = visits.sort((a,b) => b.timestamp - a.timestamp);
-            const moodIcons = { 'Happy': '😄', 'Calm': '😌', 'Fussy': '😫', 'Sick': '🤒' };
-
-            sorted.forEach(v => {
-                const medsHtml = (v.meds && v.meds.length > 0) ? v.meds.map(m => `<span class="inline-block bg-brand-50 text-brand-700 px-1.5 py-0.5 rounded text-[10px] font-bold border border-brand-100 mr-1 mt-1">💊 ${m}</span>`).join('') : '<span class="text-slate-400 text-xs italic">No meds</span>';
-                
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/50 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-3 align-top whitespace-nowrap">
-                        <div class="font-bold text-slate-700">${v.dateStr}</div>
-                        <div class="text-xl mt-1">${moodIcons[v.mood] || '❓'}</div>
-                    </td>
-                    <td class="p-3 align-top text-xs space-y-1">
-                        <div><span class="text-slate-400">HR:</span> <span class="font-semibold">${v.hr || '-'}</span></div>
-                        <div><span class="text-slate-400">Ht/Wt:</span> <span class="font-semibold">${v.height||'-'}/${v.weight||'-'}</span></div>
-                        <div><span class="text-slate-400">Teeth:</span> <span>${v.teeth}</span></div>
-                    </td>
-                    <td class="p-3 align-top">
-                        <div class="mb-1">${medsHtml}</div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // --- Add Patient Flow & Photo Upload ---
-        document.getElementById('openAddPatientBtn').onclick = () => {
-            document.getElementById('addPatientModal').classList.remove('view-hidden');
-            selectedPhotoFile = null;
-            document.getElementById('photoPreview').innerHTML = `<svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>`;
-        };
-        
-        document.getElementById('closeModalBtn').onclick = () => {
-            document.getElementById('addPatientModal').classList.add('view-hidden');
-            document.getElementById('addPatientForm').reset();
-        };
-
-        // Handle Photo Selection
-        document.getElementById('pPhoto').addEventListener('change', function(e) {
-            if (e.target.files && e.target.files[0]) {
-                selectedPhotoFile = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('photoPreview').innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-                };
-                reader.readAsDataURL(selectedPhotoFile);
-            }
-        });
-
-        // Submit New Patient
-        document.getElementById('addPatientForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!currentUserId) return;
-
-            const btn = document.getElementById('savePatientBtn');
-            const ogText = btn.innerHTML;
-            btn.innerHTML = 'Saving...';
-            btn.disabled = true;
-
-            let photoUrl = null;
-
-            try {
-                // 1. Upload Photo if selected
-                if (selectedPhotoFile) {
-                    btn.innerHTML = 'Uploading Photo...';
-                    const storageRef = ref(storage, `artifacts/${appId}/users/${currentUserId}/patient_photos/${Date.now()}_${selectedPhotoFile.name}`);
-                    await uploadBytes(storageRef, selectedPhotoFile);
-                    photoUrl = await getDownloadURL(storageRef);
-                }
-
-                // 2. Save Document
-                btn.innerHTML = 'Saving Data...';
-                await addDoc(getPatientsRef(), {
-                    name: document.getElementById('nName').value.trim(),
-                    age: document.getElementById('nAge').value,
-                    sex: document.getElementById('nSex').value,
-                    allergies: document.getElementById('nAllergies').value.trim(),
-                    photoUrl: photoUrl,
-                    createdAt: Date.now()
-                });
-
-                document.getElementById('addPatientModal').classList.add('view-hidden');
-                document.getElementById('addPatientForm').reset();
-                showToast("Patient added successfully!", "success");
-
-            } catch(err) {
-                console.error(err);
-                showToast("Failed to add patient.", "error");
-            } finally {
-                btn.innerHTML = ogText;
-                btn.disabled = false;
-            }
-        });
-
-        // --- Meds Tags Logic ---
-        const vMedInput = document.getElementById('vMedInput');
-        const addMedBtn = document.getElementById('addMedBtn');
-        const medTagsContainer = document.getElementById('medTagsContainer');
-
-        function renderMedTags() {
-            medTagsContainer.innerHTML = currentMeds.map((med, idx) => `
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-brand-50 border border-brand-200 text-brand-700 text-xs font-bold">
-                    💊 ${med}
-                    <button type="button" onclick="window.removeMed(${idx})" class="text-brand-400 hover:text-brand-600 focus:outline-none ml-1">×</button>
-                </span>
-            `).join('');
-        }
-        window.removeMed = (idx) => { currentMeds.splice(idx, 1); renderMedTags(); };
-        
-        const addMed = () => {
-            const val = vMedInput.value.trim();
-            if (val && !currentMeds.includes(val)) {
-                currentMeds.push(val);
-                vMedInput.value = '';
-                renderMedTags();
-            }
-        };
-        addMedBtn.addEventListener('click', addMed);
-        vMedInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') { e.preventDefault(); addMed(); } });
-
-        // --- Save Visit Logic ---
-        document.getElementById('visitForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!currentUserId || !currentPatientId) return;
-
-            const btn = document.getElementById('submitVisitBtn');
-            const ogText = btn.innerHTML;
-            btn.innerHTML = 'Saving...';
-            btn.disabled = true;
-
-            const visitData = {
-                hr: document.getElementById('vHr').value,
-                height: document.getElementById('vHeight').value,
-                weight: document.getElementById('vWeight').value,
-                teeth: document.getElementById('vTeeth').value,
-                meds: [...currentMeds],
-                mGross: document.getElementById('mGross').value,
-                mFine: document.getElementById('mFine').value,
-                mSpeech: document.getElementById('mSpeech').value,
-                mSocial: document.getElementById('mSocial').value,
-                mood: document.querySelector('input[name="vMood"]:checked').value,
-                timestamp: Date.now(),
-                dateStr: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-            };
-
-            try {
-                await addDoc(getVisitsRef(currentPatientId), visitData);
-                document.getElementById('visitForm').reset();
-                currentMeds = [];
-                renderMedTags();
-                showToast("Visit logged successfully", "success");
-            } catch(err) {
-                console.error(err);
-                showToast("Failed to save visit", "error");
-            } finally {
-                btn.innerHTML = ogText;
-                btn.disabled = false;
-            }
-        });
-
-        // --- Toast Utility ---
-        function showToast(message, type = 'info') {
+        // Helper: Toasts
+        window.showToast = (message, type = 'info') => {
             const toast = document.createElement('div');
-            const colors = type === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800';
-            toast.className = `px-4 py-3 rounded-xl border shadow-lg transform transition-all duration-300 translate-y-10 opacity-0 flex items-center gap-2 text-sm font-semibold ${colors}`;
-            toast.innerHTML = `${type === 'success' ? '✅' : '⚠️'} ${message}`;
-            document.getElementById('toastContainer').appendChild(toast);
-            
+            const colors = {
+                success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                error: 'bg-red-50 text-red-800 border-red-200',
+                info: 'bg-blue-50 text-blue-800 border-blue-200'
+            };
+            toast.className = `px-4 py-3 rounded-xl border shadow-lg transform transition-all duration-300 translate-y-10 opacity-0 flex items-center gap-2 text-sm font-semibold ${colors[type]}`;
+            toast.innerHTML = `${type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️'} ${message}`;
+            toastContainer.appendChild(toast);
             requestAnimationFrame(() => toast.classList.remove('translate-y-10', 'opacity-0'));
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
+        };
+
+        // UI View Toggles
+        window.showRosterView = () => {
+            patientFileView.classList.add('hidden');
+            rosterView.classList.remove('hidden');
+            currentActivePatientId = null;
+            if(unsubscribeVisits) unsubscribeVisits();
+        };
+
+        window.openPatientFile = (id) => {
+            const pt = patients.find(p => p.id === id);
+            if(!pt) return;
+            currentActivePatientId = id;
+            
+            // Populate Header
+            document.getElementById('pfName').textContent = pt.name;
+            document.getElementById('pfAge').textContent = `${calculateAge(pt.dob)} yrs`;
+            document.getElementById('pfSex').textContent = pt.sex;
+            
+            const imgEl = document.getElementById('pfImage');
+            imgEl.src = pt.photoBase64 || `https://placehold.co/100x100/e2e8f0/64748b?text=${pt.name.charAt(0)}`;
+            
+            // Build alerts string
+            let alerts = [];
+            if(pt.allergies) alerts.push(`Allergies: ${pt.allergies}`);
+            if(pt.conditions) alerts.push(`Conditions: ${pt.conditions}`);
+            document.getElementById('pfAlerts').textContent = alerts.length > 0 ? alerts.join(' | ') : 'None';
+
+            // Reset visit form
+            document.getElementById('visitForm').reset();
+            document.getElementById('vBmiValue').textContent = '--';
+            document.getElementById('vBmiBadge').classList.add('hidden');
+            currentVisitMeds = [];
+            renderMeds();
+
+            // Toggle views
+            rosterView.classList.add('hidden');
+            patientFileView.classList.remove('hidden');
+
+            loadVisits(id);
+        };
+
+        // Calculate Age
+        function calculateAge(dobStr) {
+            const diff = Date.now() - new Date(dobStr).getTime();
+            return (diff / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1);
         }
 
+        // LOAD PATIENTS (Roster)
+        function loadPatients() {
+            if(!currentUserId) return;
+            const ref = collection(db, 'artifacts', appId, 'users', currentUserId, 'patients');
+            onSnapshot(ref, (snap) => {
+                patients = [];
+                snap.forEach(doc => patients.push({id: doc.id, ...doc.data()}));
+                renderRoster();
+            }, (error) => {
+                console.error(error);
+                showToast("Failed to load patients.", "error");
+            });
+        }
+
+        function renderRoster() {
+            if(patients.length === 0) {
+                patientsGrid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 bg-white/50 rounded-2xl border border-slate-200">No patients registered yet.</div>`;
+                return;
+            }
+            
+            patientsGrid.innerHTML = '';
+            // Sort by latest added
+            const sorted = [...patients].sort((a,b) => b.createdAt - a.createdAt);
+
+            sorted.forEach(pt => {
+                const age = calculateAge(pt.dob);
+                const imgSrc = pt.photoBase64 || `https://placehold.co/100x100/e2e8f0/64748b?text=${pt.name.charAt(0)}`;
+                const hasAlerts = pt.allergies || pt.conditions;
+
+                const card = document.createElement('div');
+                card.className = "glass-panel p-5 rounded-2xl cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 flex flex-col items-center text-center group border border-white/60";
+                card.onclick = () => openPatientFile(pt.id);
+                
+                card.innerHTML = `
+                    <div class="relative mb-3">
+                        <img src="${imgSrc}" class="w-16 h-16 rounded-full object-cover border-4 border-white shadow-sm transition-transform group-hover:rotate-3">
+                        ${hasAlerts ? `<div class="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse" title="Medical Alert"></div>` : ''}
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm truncate w-full">${pt.name}</h3>
+                    <div class="text-xs text-slate-500 mt-1 flex gap-2 justify-center w-full">
+                        <span class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">${age}y</span>
+                        <span class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">${pt.sex}</span>
+                    </div>
+                `;
+                patientsGrid.appendChild(card);
+            });
+        }
+
+        // IMAGE COMPRESSOR (Free Storage via Canvas -> Base64)
+        const newPImage = document.getElementById('newPImage');
+        const newPPreview = document.getElementById('newPPreview');
+        const newPBase64 = document.getElementById('newPBase64');
+
+        newPImage.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const max = 200; // Force small dimension to save DB space
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height && width > max) {
+                        height *= max / width; width = max;
+                    } else if (height > max) {
+                        width *= max / height; height = max;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Compress to JPEG 0.7
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    newPBase64.value = dataUrl;
+                    newPPreview.src = dataUrl;
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ADD PATIENT LOGIC
+        document.getElementById('newPatientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentUserId) return;
+            const btn = document.getElementById('newPSubmit');
+            btn.disabled = true; btn.textContent = 'Saving...';
+
+            const payload = {
+                name: document.getElementById('newPName').value.trim(),
+                dob: document.getElementById('newPDob').value,
+                sex: document.getElementById('newPSex').value,
+                allergies: document.getElementById('newPAllergies').value.trim(),
+                conditions: document.getElementById('newPConditions').value.trim(),
+                photoBase64: newPBase64.value, // Free storage!
+                createdAt: Date.now()
+            };
+
+            try {
+                const ref = collection(db, 'artifacts', appId, 'users', currentUserId, 'patients');
+                await addDoc(ref, payload);
+                document.getElementById('newPatientForm').reset();
+                newPPreview.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=+';
+                newPBase64.value = '';
+                document.getElementById('addPatientModal').classList.add('hidden');
+                showToast("Patient added successfully!", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to add patient", "error");
+            } finally {
+                btn.disabled = false; btn.textContent = 'Register Patient';
+            }
+        });
+
+        // BMI CALCULATOR LOGIC (Dynamic)
+        const vHeight = document.getElementById('vHeight');
+        const vWeight = document.getElementById('vWeight');
+        const vBmiVal = document.getElementById('vBmiValue');
+        const vBmiBdge = document.getElementById('vBmiBadge');
+
+        const calcBMI = () => {
+            const h = parseFloat(vHeight.value);
+            const w = parseFloat(vWeight.value);
+            if(h > 0 && w > 0) {
+                const hm = h / 100;
+                const bmi = (w / (hm*hm)).toFixed(1);
+                vBmiVal.textContent = bmi;
+                vBmiBdge.classList.remove('hidden', 'bg-blue-100', 'text-blue-700', 'bg-emerald-100', 'text-emerald-700', 'bg-amber-100', 'text-amber-700', 'bg-red-100', 'text-red-700');
+                if(bmi < 14) { vBmiBdge.textContent = 'Under'; vBmiBdge.classList.add('bg-blue-100', 'text-blue-700'); }
+                else if(bmi <= 18) { vBmiBdge.textContent = 'Normal'; vBmiBdge.classList.add('bg-emerald-100', 'text-emerald-700'); }
+                else if(bmi <= 20) { vBmiBdge.textContent = 'Risk'; vBmiBdge.classList.add('bg-amber-100', 'text-amber-700'); }
+                else { vBmiBdge.textContent = 'Over'; vBmiBdge.classList.add('bg-red-100', 'text-red-700'); }
+            } else {
+                vBmiVal.textContent = '--'; vBmiBdge.classList.add('hidden');
+            }
+        };
+        vHeight.addEventListener('input', calcBMI);
+        vWeight.addEventListener('input', calcBMI);
+
+        // MEDICATION TAGS
+        const vMedInput = document.getElementById('vMedInput');
+        function renderMeds() {
+            const cont = document.getElementById('vMedTags');
+            cont.innerHTML = currentVisitMeds.map((m, i) => `
+                <span class="inline-flex items-center gap-1 bg-brand-50 text-brand-700 px-2 py-0.5 rounded text-[10px] font-bold border border-brand-200 shadow-sm">
+                    💊 ${m} <button type="button" onclick="window.remMed(${i})" class="text-brand-500 hover:text-red-500 font-bold ml-1">x</button>
+                </span>
+            `).join('');
+        }
+        window.remMed = (i) => { currentVisitMeds.splice(i, 1); renderMeds(); };
+        document.getElementById('vAddMedBtn').addEventListener('click', () => {
+            const val = vMedInput.value.trim();
+            if(val && !currentVisitMeds.includes(val)) {
+                currentVisitMeds.push(val); vMedInput.value = ''; renderMeds();
+            }
+        });
+
+        // SAVE VISIT
+        document.getElementById('visitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentUserId || !currentActivePatientId) return;
+            const btn = document.getElementById('vSubmitBtn');
+            btn.disabled = true; btn.textContent = 'Saving...';
+
+            // Get mood safely
+            let moodVal = "Unknown";
+            const moodInput = document.querySelector('input[name="vMood"]:checked');
+            if(moodInput) moodVal = moodInput.value;
+
+            const payload = {
+                height: vHeight.value,
+                weight: vWeight.value,
+                bmi: vBmiVal.textContent,
+                hr: document.getElementById('vHr').value,
+                teeth: document.getElementById('vTeeth').value,
+                meds: [...currentVisitMeds],
+                mGross: document.getElementById('vGross').value,
+                mFine: document.getElementById('vFine').value,
+                mSpeech: document.getElementById('vSpeech').value,
+                mSocial: document.getElementById('vSocial').value,
+                mood: moodVal,
+                timestamp: Date.now(),
+                dateStr: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            };
+
+            try {
+                // Rule 1: Strict paths logic
+                const ref = collection(db, 'artifacts', appId, 'users', currentUserId, 'patients', currentActivePatientId, 'visits');
+                await addDoc(ref, payload);
+                
+                document.getElementById('visitForm').reset();
+                calcBMI();
+                currentVisitMeds = []; renderMeds();
+                showToast("Clinical check saved!", "success");
+            } catch(err) {
+                console.error(err);
+                showToast("Failed to save check", "error");
+            } finally {
+                btn.disabled = false; btn.textContent = 'Save Check-in';
+            }
+        });
+
+        // LOAD VISITS
+        function loadVisits(patientId) {
+            if(!currentUserId) return;
+            const tb = document.getElementById('visitsTableBody');
+            tb.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400">Loading records...</td></tr>`;
+            
+            if(unsubscribeVisits) unsubscribeVisits();
+            
+            const ref = collection(db, 'artifacts', appId, 'users', currentUserId, 'patients', patientId, 'visits');
+            unsubscribeVisits = onSnapshot(ref, (snap) => {
+                let visits = [];
+                snap.forEach(doc => visits.push({id: doc.id, ...doc.data()}));
+                
+                if(visits.length === 0) {
+                    tb.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 bg-white/50 rounded-xl">No visits recorded yet. Add one from the form.</td></tr>`;
+                    return;
+                }
+                
+                // Manual sort descending
+                visits.sort((a,b) => b.timestamp - a.timestamp);
+                tb.innerHTML = '';
+                const moodIcons = { 'Happy': '😄', 'Calm': '😌', 'Fussy': '😫', 'Sick': '🤒' };
+
+                visits.forEach(v => {
+                    const medsHtml = (v.meds && v.meds.length > 0) ? v.meds.map(m => `<span class="inline-block bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-bold border border-slate-200 mr-1 mt-1">${m}</span>`).join('') : '<span class="text-xs text-slate-400">No meds</span>';
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-white/60 transition-colors border-b border-slate-100 last:border-0";
+                    tr.innerHTML = `
+                        <td class="p-4 align-top text-xs font-semibold text-slate-600">${v.dateStr}</td>
+                        <td class="p-4 align-top text-xs space-y-1">
+                            <div><span class="text-slate-400">Ht/Wt:</span> <span class="font-bold text-slate-700">${v.height||'--'}cm / ${v.weight||'--'}kg</span></div>
+                            <div><span class="text-slate-400">BMI:</span> <span class="font-bold text-brand-600">${v.bmi}</span></div>
+                            <div><span class="text-slate-400">HR:</span> <span class="font-bold text-slate-700">${v.hr||'--'}</span></div>
+                        </td>
+                        <td class="p-4 align-top">
+                            <div class="text-[10px] font-bold text-slate-500 mb-1">Teeth: ${v.teeth}</div>
+                            <div>${medsHtml}</div>
+                        </td>
+                        <td class="p-4 align-top text-center text-2xl">${moodIcons[v.mood] || '❓'}</td>
+                    `;
+                    tb.appendChild(tr);
+                });
+            }, (error) => {
+                console.error(error);
+                tb.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-400">Error loading visits.</td></tr>`;
+            });
+        }
     </script>
 </body>
 </html>
